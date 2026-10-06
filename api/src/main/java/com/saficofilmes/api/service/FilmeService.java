@@ -59,6 +59,11 @@ public class FilmeService {
         filmeRepository.delete(filme);
     }
 
+    @Transactional(readOnly = true)
+    public Page<FilmeResponseDTO> buscarPorNomeArtista(String nome, Pageable pageable) {
+        return filmeRepository.buscarPorArtista(nome, pageable)
+                .map(this::converterParaResponseDTO);
+    }
 
     private FilmeResponseDTO converterParaResponseDTO(Filme filme) {
         String nomeDiretor = (filme.getDiretor() != null) ? filme.getDiretor().getNome() : null;
@@ -85,6 +90,5 @@ public class FilmeService {
         filme.setAnoLancamento(dto.anoLancamento());
         filme.setDuracaoMinutos(dto.duracaoMinutos());
         filme.setTipoRepresentatividade(dto.tipoRepresentatividade());
-
     }
-}
+}}

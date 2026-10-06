@@ -35,7 +35,6 @@ public class FilmeController {
     public ResponseEntity<FilmeResponseDTO> salvar(@RequestBody @Valid FilmeRequestDTO dto) {
         FilmeResponseDTO salvo = filmeService.salvar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
-
     }
 
     @PutMapping("/{id}")
@@ -46,6 +45,16 @@ public class FilmeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         filmeService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/por-artista")
+    public ResponseEntity<Page<FilmeResponseDTO>> buscarPorArtista(
+            @RequestParam String nome,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(filmeService.buscarPorNomeArtista(nome, pageable));
+    }
+}        filmeService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }
