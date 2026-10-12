@@ -39,7 +39,20 @@ public class Filme {
     // Construtor vazio exigido pelo JPA
     public Filme() {
     }
+// ... lista de plataformas que já estava lá ...
 
+    // Relacionamento N:N com Artista
+    @ManyToMany
+    @JoinTable(
+            name = "tb_filme_artista",
+            joinColumns = @JoinColumn(name = "filme_id"),
+            inverseJoinColumns = @JoinColumn(name = "artista_id")
+    )
+    private List<Artista> artistas = new ArrayList<>();
+
+    // ... código dos getters e setters
+    public List<Artista> getArtistas() { return artistas; }
+    public void setArtistas(List<Artista> artistas) { this.artistas = artistas; }
     // --- Getters e Setters ---
 
     public Long getId() { return id; }
