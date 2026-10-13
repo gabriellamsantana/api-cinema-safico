@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// Imports obrigatórios para o HATEOAS funcionar
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping("/filmes")
 public class FilmeController {
@@ -17,36 +21,40 @@ public class FilmeController {
     @Autowired
     private FilmeService service;
 
-    // Endpoint para criar um novo filme
     @PostMapping
     public ResponseEntity<Filme> cadastrar(@Valid @RequestBody Filme filme) {
-        Filme filmeSalvo = service.salvar(filme);
-        return ResponseEntity.status(HttpStatus.CREATED).body(filmeSalvo); // Retorna 201 Created
+        Filme salvo = service.salvar(filme);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
-    // Endpoint para listar todos os filmes com paginação
     @GetMapping
-    public ResponseEntity<Page<Filme>> listarTodos(Pageable pageable) {
-        return ResponseEntity.ok(service.listarTodos(pageable)); // Retorna 200 OK
+    public ResponseEntity<Page<Filme>> listarTodas(Pageable pageable) {
+        // Nota: se o seu método no service se chamar listarTodos, ajuste aqui
+        return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
-    // Endpoint para buscar um filme específico pelo ID
     @GetMapping("/{id}")
     public ResponseEntity<Filme> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.buscarPorId(id)); // Retorna 200 OK
+        Filme filme = service.buscarPorId(id);
+
+        // HATEOAS: Adiciona um link para o próprio filme (self)
+        filme.add(linkTo(methodOn(FilmeController.class).buscarPorId(id)).withSelfRel());
+
+        // HATEOAS: Adiciona um link rápido para a lista completa
+        filme.add(linkTo(methodOn(FilmeController.class).listarTodas(null)).withRel("lista-completa"));
+
+        return ResponseEntity.ok(filme);
     }
 
-    // Endpoint para atualizar um filme pelo ID
     @PutMapping("/{id}")
     public ResponseEntity<Filme> atualizar(@PathVariable Long id, @Valid @RequestBody Filme filme) {
         Filme filmeAtualizado = service.atualizar(id, filme);
-        return ResponseEntity.ok(filmeAtualizado); // Retorna 200 OK
+        return ResponseEntity.ok(filmeAtualizado);
     }
 
-    // Endpoint para eliminar um filme pelo ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.deletar(id);
-        return ResponseEntity.noContent().build(); // Retorna 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }

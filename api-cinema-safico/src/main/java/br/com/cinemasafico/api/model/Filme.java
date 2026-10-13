@@ -1,59 +1,49 @@
 package br.com.cinemasafico.api.model;
 
+import org.springframework.hateoas.RepresentationModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
-@Table(name = "tb_filme")
-public class Filme {
+@Table(name = "filmes")
+public class Filme extends RepresentationModel<Filme> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "O título é obrigatório e não pode estar em branco")
+    @NotBlank(message = "O título é obrigatório")
     private String titulo;
 
+    @NotBlank(message = "A sinopse é obrigatória")
     private String sinopse;
 
-    // Relacionamento 1:1 com Ficha Técnica
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ficha_tecnica_id", referencedColumnName = "id")
     private FichaTecnica fichaTecnica;
 
-    // Relacionamento 1:N com Avaliação
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL)
     private List<Avaliacao> avaliacoes = new ArrayList<>();
 
-    // Relacionamento N:N com Plataforma
     @ManyToMany
     @JoinTable(
-            name = "tb_filme_plataforma",
-            joinColumns = @JoinColumn(name = "filme_id"),
-            inverseJoinColumns = @JoinColumn(name = "plataforma_id")
-    )
-    private List<Plataforma> plataformas = new ArrayList<>();
-
-    // Construtor vazio exigido pelo JPA
-    public Filme() {
-    }
-// ... lista de plataformas que já estava lá ...
-
-    // Relacionamento N:N com Artista
-    @ManyToMany
-    @JoinTable(
-            name = "tb_filme_artista",
+            name = "filme_artista",
             joinColumns = @JoinColumn(name = "filme_id"),
             inverseJoinColumns = @JoinColumn(name = "artista_id")
     )
     private List<Artista> artistas = new ArrayList<>();
 
-    // ... código dos getters e setters
-    public List<Artista> getArtistas() { return artistas; }
-    public void setArtistas(List<Artista> artistas) { this.artistas = artistas; }
-    // --- Getters e Setters ---
+    @ManyToMany
+    @JoinTable(
+            name = "filme_plataforma",
+            joinColumns = @JoinColumn(name = "filme_id"),
+            inverseJoinColumns = @JoinColumn(name = "plataforma_id")
+    )
+    private List<Plataforma> plataformas = new ArrayList<>();
+
+    // --- GETTERS E SETTERS ---
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -69,6 +59,9 @@ public class Filme {
 
     public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
     public void setAvaliacoes(List<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
+
+    public List<Artista> getArtistas() { return artistas; }
+    public void setArtistas(List<Artista> artistas) { this.artistas = artistas; }
 
     public List<Plataforma> getPlataformas() { return plataformas; }
     public void setPlataformas(List<Plataforma> plataformas) { this.plataformas = plataformas; }
