@@ -10,6 +10,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class FilmeService {
 
+    // Método para atualizar um filme existente
+    public Filme atualizar(Long id, Filme filmeAtualizado) {
+        // Primeiro, garantimos que o filme existe usando o método que já criámos
+        Filme filmeExistente = buscarPorId(id);
+
+        // Atualizamos apenas os campos permitidos
+        filmeExistente.setTitulo(filmeAtualizado.getTitulo());
+        filmeExistente.setSinopse(filmeAtualizado.getSinopse());
+
+        // Atualiza a ficha técnica associada
+        if (filmeAtualizado.getFichaTecnica() != null && filmeExistente.getFichaTecnica() != null) {
+            filmeExistente.getFichaTecnica().setAnoLancamento(filmeAtualizado.getFichaTecnica().getAnoLancamento());
+            filmeExistente.getFichaTecnica().setDuracaoMinutos(filmeAtualizado.getFichaTecnica().getDuracaoMinutos());
+        }
+
+        return repository.save(filmeExistente);
+    }
+
+    // Método para eliminar um filme
+    public void deletar(Long id) {
+        Filme filme = buscarPorId(id);
+        repository.delete(filme);
+    }
     @Autowired
     private FilmeRepository repository;
 

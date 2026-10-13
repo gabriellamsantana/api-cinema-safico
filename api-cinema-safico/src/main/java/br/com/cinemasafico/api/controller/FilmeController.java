@@ -35,4 +35,18 @@ public class FilmeController {
     public ResponseEntity<Filme> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id)); // Retorna 200 OK
     }
+
+    // Endpoint para atualizar um filme pelo ID
+    @PutMapping("/{id}")
+    public ResponseEntity<Filme> atualizar(@PathVariable Long id, @Valid @RequestBody Filme filme) {
+        Filme filmeAtualizado = service.atualizar(id, filme);
+        return ResponseEntity.ok(filmeAtualizado); // Retorna 200 OK
+    }
+
+    // Endpoint para eliminar um filme pelo ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        service.deletar(id);
+        return ResponseEntity.noContent().build(); // Retorna 204 No Content
+    }
 }
