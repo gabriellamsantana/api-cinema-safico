@@ -1,76 +1,62 @@
 package br.com.cinemasafico.api.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1. Tratar erros de "Não Encontrado" (404) e Regras de Negócio (400)
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> tratarErroRuntime(RuntimeException ex) {
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatus(ResponseStatusException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-
-        // Se a mensagem for de não encontrado, devolve 404, senão devolve 400 (Bad Request)
-        HttpStatus status = ex.getMessage().toLowerCase().contains("não encontrad") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-
-        body.put("status", status.value());
-        body.put("erro", ex.getMessage());
-
-        return ResponseEntity.status(status).body(body);
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", ex.getStatusCode().value());
+        body.put("erro", ex.getReason());
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
     }
 
-    // 2. Tratar erros de Validação (400 Bad Request) - Quando o @Valid reprova o JSON
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> tratarErroValidacao(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("erro", ex.getMessage() != null ? ex.getMessage() : "Recurso não encontrado");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
+        List<String> detalhes = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("erro", "Erro de validação nos dados enviados");
-
-        // Extrai as mensagens específicas de cada campo que falhou na validação
-        List<String> erros = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.toList());
-
-        body.put("detalhes", erros);
-
+        body.put("detalhes", detalhes);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    // 3. Tratar erro de Método HTTP incorreto (405 Method Not Allowed)
-    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Map<String, Object>> tratarMetodoNaoPermitido(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.METHOD_NOT_ALLOWED.value());
-        body.put("erro", "Método HTTP não suportado para esta rota.");
-        body.put("metodoEnviado", ex.getMethod());
-        body.put("metodosSuportados", ex.getSupportedHttpMethods());
-
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);
-    }
-
-    // 4. Tratar qualquer erro inesperado do servidor (500 Internal Server Error)
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> tratarErrosGerais(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("erro", "Ocorreu um erro interno no servidor. Por favor, tente novamente mais tarde.");
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("erro", "ID fornecido é inválido (erro de tipo)");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 }

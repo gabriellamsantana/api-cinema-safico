@@ -5,7 +5,9 @@ import br.com.cinemasafico.api.repository.FilmeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class FilmeService {
@@ -18,7 +20,12 @@ public class FilmeService {
     }
 
     public Filme buscarPorId(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Filme não encontrado"));
+        return repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Filme não encontrado"));
+    }
+
+    public Page<Filme> buscarPorTitulo(String titulo, Pageable pageable) {
+        return repository.findByTituloContainingIgnoreCase(titulo, pageable);
     }
 
     public Filme salvar(Filme filme) {
