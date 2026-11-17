@@ -1,10 +1,12 @@
 package br.com.cinemasafico.api.model;
 
-import org.springframework.hateoas.RepresentationModel;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
+import org.springframework.hateoas.RepresentationModel;
+
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "filmes")
@@ -22,9 +24,11 @@ public class Filme extends RepresentationModel<Filme> {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ficha_tecnica_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"filme", "filmes"})
     private FichaTecnica fichaTecnica;
 
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"filme", "filmes"})
     private List<Avaliacao> avaliacoes = new ArrayList<>();
 
     @ManyToMany
@@ -33,6 +37,7 @@ public class Filme extends RepresentationModel<Filme> {
             joinColumns = @JoinColumn(name = "filme_id"),
             inverseJoinColumns = @JoinColumn(name = "artista_id")
     )
+    @JsonIgnoreProperties({"filme", "filmes"})
     private List<Artista> artistas = new ArrayList<>();
 
     @ManyToMany
@@ -41,9 +46,10 @@ public class Filme extends RepresentationModel<Filme> {
             joinColumns = @JoinColumn(name = "filme_id"),
             inverseJoinColumns = @JoinColumn(name = "plataforma_id")
     )
+    @JsonIgnoreProperties({"filme", "filmes"})
     private List<Plataforma> plataformas = new ArrayList<>();
 
-    // --- GETTERS E SETTERS ---
+// --- GETTERS E SETTERS ---
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
