@@ -72,6 +72,7 @@ public class SwaggerConfig {
                 .group("v1")
                 .displayName("Versão 1.0 (v1)")
                 .pathsToMatch("/api/v1/**")
+                .addOperationCustomizer(idempotencyHeaderCustomizer())
                 .build();
     }
 
@@ -81,6 +82,7 @@ public class SwaggerConfig {
                 .group("v2")
                 .displayName("Versão 2.0 (v2)")
                 .pathsToMatch("/api/v2/**")
+                .addOperationCustomizer(idempotencyHeaderCustomizer())
                 .build();
     }
 
@@ -88,13 +90,18 @@ public class SwaggerConfig {
     public OperationCustomizer idempotencyHeaderCustomizer() {
         return (operation, handlerMethod) -> {
             if (handlerMethod.hasMethodAnnotation(PostMapping.class)) {
-                Parameter idempotencyHeader = new Parameter()
-                        .in("header")
-                        .name("X-Idempotency-Key")
-                        .description("Chave única (ex: UUID) para garantir a idempotência da requisição POST e evitar duplicidade.")
-                        .required(true)
-                        .schema(new StringSchema().example("550e8400-e29b-41d4-a716-446655440000"));
-                operation.addParametersItem(idempotencyHeader);
+                boolean alreadyExists = operation.getParameters() != null &&
+                        operation.getParameters().stream()
+                                .anyMatch(p -> "X-Idempotency-Key".equalsIgnoreCase(p.getName()));
+                if (!alreadyExists) {
+                    Parameter idempotencyHeader = new Parameter()
+                            .in("header")
+                            .name("X-Idempotency-Key")
+                            .description("Chave única (ex: UUID) para garantir a idempotência da requisição POST e evitar duplicidade.")
+                            .required(true)
+                            .schema(new StringSchema().example("550e8400-e29b-41d4-a716-446655440000"));
+                    operation.addParametersItem(idempotencyHeader);
+                }
             }
             return operation;
         };

@@ -3,6 +3,7 @@ package br.com.cinemasafico.api.controller;
 import br.com.cinemasafico.api.security.ApiKeyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -39,7 +40,11 @@ public class ApiKeyController {
     })
     public ResponseEntity<ApiKeyResponse> gerarChave(
             @Parameter(description = "ID do usuário proprietário da chave", example = "1", required = true)
-            @PathVariable Integer usuarioId) {
+            @PathVariable Integer usuarioId,
+            @Parameter(in = ParameterIn.HEADER, name = "X-Idempotency-Key",
+                    description = "Chave única (ex: UUID) para garantir a idempotência da requisição POST e evitar duplicidade.",
+                    example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey) {
 
         if (usuarioId == null || usuarioId <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID do usuário deve ser um número positivo.");
