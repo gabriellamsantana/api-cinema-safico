@@ -9,15 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ApiKeyService {
 
-    private final Map<String, String> validKeys = new ConcurrentHashMap<>();
+    private final Map<String, Integer> validKeys = new ConcurrentHashMap<>();
 
-    public ApiKeyService() {
-        validKeys.put("safico-key-2026", "admin@cinemasafico.com.br");
-    }
-
-    public String generateKey(String ownerEmail) {
+    public String generateKey(Integer usuarioId) {
         String newKey = "sfk-" + UUID.randomUUID();
-        validKeys.put(newKey, ownerEmail);
+        validKeys.put(newKey, usuarioId);
         return newKey;
     }
 

@@ -5,8 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -27,22 +25,19 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
-        String method = request.getMethod();
 
-        if ("OPTIONS".equalsIgnoreCase(method)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())
                 || !path.startsWith("/api/")
-                || path.startsWith("/api/v1/auth/api-keys")) {
+                || path.contains("/api-keys/usuario/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String apiKey = request.getHeader("X-API-Key");
-
         if (!apiKeyService.isValid(apiKey)) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"status\": 401, \"erro\": \"Chave de API (X-API-Key) ausente ou invalida.\"}");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"erro\": \"API Key ausente ou inválida. Gere uma chave em POST /api/v1/api-keys/usuario/{usuarioId}\"}");
             return;
         }
 

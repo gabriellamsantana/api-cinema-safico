@@ -26,11 +26,10 @@ import org.springframework.web.bind.annotation.PostMapping;
                         API RESTful desenvolvida em Java e Spring Boot para catalogação de filmes, artistas, plataformas e avaliações do cinema sáfico.
                         
                         **Como testar no Swagger:**
-                        1. **Gerar API Key:** Abra `POST /api/v1/auth/api-keys` e clique em **Execute** para gerar automaticamente uma chave única (`sfk-...`).
-                        2. **Autenticar:** Clique no botão **Authorize** no topo direito, cole a chave gerada e confirme.
+                        1. **Gerar API Key:** Abra `POST /api/v1/api-keys/usuario/{usuarioId}`, informe um número (ex: `1`) e um UUID em `X-Idempotency-Key`, e clique em **Execute**.
+                        2. **Autenticar:** Copie a chave `apiKey` gerada (`sfk-...`), clique no botão **Authorize** no topo direito, cole e confirme.
                         3. **Alternar Versões:** Use o menu **Select a definition** no topo direito para alternar entre **Versão 1.0 (v1)** e **Versão 2.0 (v2)**.
-                        4. **Idempotência:** Em requisições `POST`, preencha o cabeçalho `X-Idempotency-Key` com um valor único por operação.
-                        5. **Rate Limiting:** Limite de **10 requisições por minuto** por IP (retorna HTTP `429` com `Retry-After` ao exceder).
+                        4. **Rate Limiting:** Limite de **10 requisições por minuto** por IP (retorna HTTP `429` com `Retry-After` ao exceder).
                         
                         **Precificação e Planos:**
                         | Plano | Limite de Requisições | Recursos Inclusos | Valor Mensal |
@@ -63,7 +62,7 @@ import org.springframework.web.bind.annotation.PostMapping;
         type = SecuritySchemeType.APIKEY,
         in = SecuritySchemeIn.HEADER,
         paramName = "X-API-Key",
-        description = "Cole aqui a chave gerada automaticamente em POST /api/v1/auth/api-keys"
+        description = "Cole aqui a chave gerada em POST /api/v1/api-keys/usuario/{usuarioId}"
 )
 public class SwaggerConfig {
 
@@ -81,22 +80,20 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("v2")
                 .displayName("Versão 2.0 (v2)")
-                .pathsToMatch("/api/v2/**", "/api/v1/auth/**")
+                .pathsToMatch("/api/v2/**")
                 .build();
     }
 
     @Bean
     public OperationCustomizer idempotencyHeaderCustomizer() {
         return (operation, handlerMethod) -> {
-            boolean isPost = handlerMethod.hasMethodAnnotation(PostMapping.class);
-            boolean isAuthEndpoint = handlerMethod.getBeanType().getSimpleName().equals("ApiKeyController");
-            if (isPost && !isAuthEndpoint) {
+            if (handlerMethod.hasMethodAnnotation(PostMapping.class)) {
                 Parameter idempotencyHeader = new Parameter()
                         .in("header")
                         .name("X-Idempotency-Key")
-                        .description("Identificador único da operação para garantir idempotência")
+                        .description("Chave única (ex: UUID) para garantir a idempotência da requisição POST e evitar duplicidade.")
                         .required(true)
-                        .schema(new StringSchema()._default("req-001"));
+                        .schema(new StringSchema().example("550e8400-e29b-41d4-a716-446655440000"));
                 operation.addParametersItem(idempotencyHeader);
             }
             return operation;
