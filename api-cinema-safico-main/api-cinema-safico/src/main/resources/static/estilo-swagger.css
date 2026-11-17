@@ -1,0 +1,17 @@
+/* Barra superior com o degradê da bandeira lésbica */
+.swagger-ui .topbar {
+    background: linear-gradient(90deg, #D52D00 0%, #FF9A56 25%, #FFFFFF 50%, #D162A4 75%, #A30262 100%) !important;
+}
+
+/* Ocultar a logo original do Swagger (opcional, para ficar mais limpo) */
+.swagger-ui .topbar .download-url-wrapper {
+    display: none !important;
+}
+.swagger-ui .topbar-wrapper svg {
+    display: none !important;
+}
+
+/* Mudar a cor do título da API para o Rosa Escuro da bandeira */
+.swagger-ui .info .title {
+    color: #A30262 !important;
+}
