@@ -14,17 +14,17 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v2/filmes")
-@Tag(name = "Filmes (v2)", description = "Segunda versão do catálogo de filmes com envelope enriquecido e metadados de contrato")
+@Tag(name = "Filmes (v2)", description = "Contrato evoluído v2 com metadados de versão e navegação HATEOAS")
 public class FilmeV2Controller {
 
-    public record FilmeV2Response(String versaoContrato, String consultadoEm, Filme dados) {}
+    public record FilmeV2Response(String versaoContrato, Instant consultadoEm, Filme dados) {}
 
     private final FilmeService service;
 
@@ -33,29 +33,28 @@ public class FilmeV2Controller {
     }
 
     @GetMapping
-    @Operation(summary = "Listar filmes (v2)", description = "Retorna a listagem paginada de filmes no contrato da versão 2.")
-    @ApiResponse(responseCode = "200", description = "Listagem retornada com sucesso")
+    @Operation(summary = "Listar filmes (Contrato v2)", description = "Retorna a lista paginada de filmes no contrato v2.")
+    @ApiResponse(responseCode = "200", description = "Lista recuperada com sucesso")
     public ResponseEntity<Page<Filme>> listarTodosV2(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(service.listarTodos(pageable));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar filme por ID com metadados (v2)", description = "Retorna o filme encapsulado com versão do contrato, timestamp da consulta e links HATEOAS entre v1 e v2.")
+    @Operation(summary = "Buscar filme por ID com metadados (Contrato v2)", description = "Retorna o filme encapsulado com metadados da versão 2.0.0 e links HATEOAS para v1 e v2.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Filme encontrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "ID fornecido é inválido (erro de tipo)"),
             @ApiResponse(responseCode = "404", description = "Filme não encontrado")
     })
     public ResponseEntity<EntityModel<FilmeV2Response>> buscarPorIdV2(
             @Parameter(description = "ID do filme", example = "1", required = true) @PathVariable Long id) {
         Filme filme = service.buscarPorId(id);
-        FilmeV2Response payloadV2 = new FilmeV2Response("2.0.0", LocalDateTime.now().toString(), filme);
+        FilmeV2Response payload = new FilmeV2Response("2.0.0", Instant.now(), filme);
 
-        EntityModel<FilmeV2Response> resource = EntityModel.of(payloadV2);
-        resource.add(linkTo(methodOn(FilmeV2Controller.class).buscarPorIdV2(id)).withSelfRel());
-        resource.add(linkTo(methodOn(FilmeV2Controller.class).listarTodosV2(Pageable.unpaged())).withRel("lista-v2"));
-        resource.add(linkTo(methodOn(FilmeController.class).buscarPorId(id)).withRel("versao-anterior-v1"));
+        EntityModel<FilmeV2Response> model = EntityModel.of(payload);
+        model.add(linkTo(methodOn(FilmeV2Controller.class).buscarPorIdV2(id)).withSelfRel());
+        model.add(linkTo(methodOn(FilmeV2Controller.class).listarTodosV2(Pageable.unpaged())).withRel("lista-v2"));
+        model.add(linkTo(methodOn(FilmeController.class).buscarPorId(id)).withRel("versao-anterior-v1"));
 
-        return ResponseEntity.ok(resource);
+        return ResponseEntity.ok(model);
     }
 }
