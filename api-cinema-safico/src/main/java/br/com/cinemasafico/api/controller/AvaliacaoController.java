@@ -30,7 +30,7 @@ public class AvaliacaoController {
         this.service = service;
     }
 
-    @GetMapping
+
     @Operation(summary = "Listar todas as avaliações de forma paginada", description = "Retorna uma página de avaliações cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista de avaliações recuperada com sucesso")
     public ResponseEntity<Page<Avaliacao>> listarTodas(@ParameterObject Pageable pageable) {

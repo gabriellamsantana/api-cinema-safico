@@ -30,7 +30,6 @@ public class FilmeController {
         this.service = service;
     }
 
-    @GetMapping
     @Operation(summary = "Listar todos os filmes de forma paginada", description = "Retorna uma página de filmes cadastrados no catálogo.")
     @ApiResponse(responseCode = "200", description = "Lista de filmes recuperada com sucesso")
     public ResponseEntity<Page<Filme>> listarTodos(@ParameterObject Pageable pageable) {

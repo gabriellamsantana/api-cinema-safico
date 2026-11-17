@@ -30,7 +30,7 @@ public class PlataformaController {
         this.service = service;
     }
 
-    @GetMapping
+
     @Operation(summary = "Listar todas as plataformas de forma paginada", description = "Retorna uma página de plataformas cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista de plataformas recuperada com sucesso")
     public ResponseEntity<Page<Plataforma>> listarTodas(@ParameterObject Pageable pageable) {

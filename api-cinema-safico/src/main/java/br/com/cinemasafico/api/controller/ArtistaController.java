@@ -30,7 +30,7 @@ public class ArtistaController {
         this.service = service;
     }
 
-    @GetMapping
+
     @Operation(summary = "Listar todas as artistas de forma paginada", description = "Retorna uma página de artistas cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista de artistas recuperada com sucesso")
     public ResponseEntity<Page<Artista>> listarTodos(@ParameterObject Pageable pageable) {
