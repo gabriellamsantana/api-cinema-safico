@@ -20,7 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/api/v1/avaliacoes")
+@RequestMapping({"/api/v1/avaliacoes", "/api/v2/avaliacoes"})
 @Tag(name = "Avaliações", description = "Endpoints para gerenciamento de notas e críticas especializadas")
 public class AvaliacaoController {
 

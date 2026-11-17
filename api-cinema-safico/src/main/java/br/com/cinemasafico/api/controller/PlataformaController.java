@@ -20,7 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/api/v1/plataformas")
+@RequestMapping({"/api/v1/plataformas", "/api/v2/plataformas"})
 @Tag(name = "Plataformas", description = "Endpoints para gerenciamento de plataformas de streaming e exibição")
 public class PlataformaController {
 
