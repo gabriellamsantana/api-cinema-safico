@@ -21,7 +21,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/filmes")
-@Tag(name = "Filmes", description = "Endpoints para gerenciamento do catálogo de filmes sáficos")
+@Tag(name = "Filmes (v1)", description = "Endpoints para gerenciamento do catálogo de filmes")
 public class FilmeController {
 
     private final FilmeService service;
@@ -30,7 +30,8 @@ public class FilmeController {
         this.service = service;
     }
 
-    @Operation(summary = "Listar todos os filmes de forma paginada", description = "Retorna uma página de filmes cadastrados no catálogo.")
+    @GetMapping
+    @Operation(summary = "Listar todos os filmes de forma paginada", description = "Retorna uma página de filmes cadastrados.")
     @ApiResponse(responseCode = "200", description = "Lista de filmes recuperada com sucesso")
     public ResponseEntity<Page<Filme>> listarTodos(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(service.listarTodos(pageable));
@@ -53,7 +54,7 @@ public class FilmeController {
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar um novo filme", description = "Adiciona um novo filme ao catálogo.")
+    @Operation(summary = "Cadastrar um novo filme", description = "Cria um novo filme no catálogo.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Filme cadastrado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados")
@@ -66,7 +67,7 @@ public class FilmeController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar os dados de um filme", description = "Atualiza completamente um filme existente pelo ID.")
+    @Operation(summary = "Atualizar um filme", description = "Atualiza os dados de um filme existente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Filme atualizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação ou ID inválido"),
@@ -82,7 +83,7 @@ public class FilmeController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir um filme pelo ID", description = "Remove um filme do catálogo.")
+    @Operation(summary = "Excluir um filme pelo ID", description = "Remove um filme pelo seu identificador.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Filme excluído com sucesso"),
             @ApiResponse(responseCode = "400", description = "ID fornecido é inválido"),
@@ -92,14 +93,5 @@ public class FilmeController {
             @Parameter(description = "ID do filme", example = "1", required = true) @PathVariable Long id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/search")
-    @Operation(summary = "Buscar filmes pelo título (paginado)", description = "Filtra filmes que contenham o termo informado no título.")
-    @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso")
-    public ResponseEntity<Page<Filme>> buscarPorTitulo(
-            @Parameter(description = "Termo do título do filme", example = "Retrato") @RequestParam String titulo,
-            @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(service.buscarPorTitulo(titulo, pageable));
     }
 }

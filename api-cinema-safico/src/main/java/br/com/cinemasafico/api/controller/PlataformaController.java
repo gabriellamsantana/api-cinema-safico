@@ -21,7 +21,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/plataformas")
-@Tag(name = "Plataformas", description = "Endpoints para gerenciamento das plataformas de streaming")
+@Tag(name = "Plataformas", description = "Endpoints para gerenciamento de plataformas de streaming e exibição")
 public class PlataformaController {
 
     private final PlataformaService service;
@@ -30,7 +30,7 @@ public class PlataformaController {
         this.service = service;
     }
 
-
+    @GetMapping
     @Operation(summary = "Listar todas as plataformas de forma paginada", description = "Retorna uma página de plataformas cadastradas.")
     @ApiResponse(responseCode = "200", description = "Lista de plataformas recuperada com sucesso")
     public ResponseEntity<Page<Plataforma>> listarTodas(@ParameterObject Pageable pageable) {
@@ -38,7 +38,7 @@ public class PlataformaController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar uma plataforma pelo ID", description = "Retorna os detalhes de uma plataforma específica.")
+    @Operation(summary = "Buscar uma plataforma pelo ID", description = "Retorna os detalhes de uma plataforma específica com links HATEOAS.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Plataforma encontrada com sucesso"),
             @ApiResponse(responseCode = "400", description = "ID fornecido é inválido (erro de tipo)"),
@@ -54,12 +54,12 @@ public class PlataformaController {
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar uma nova plataforma", description = "Adiciona um serviço de streaming ao catálogo.")
+    @Operation(summary = "Cadastrar uma nova plataforma", description = "Cria um novo registro de plataforma.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Plataforma cadastrada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados")
     })
-    public ResponseEntity<EntityModel<Plataforma>> cadastrar(@Valid @RequestBody Plataforma plataforma) {
+    public ResponseEntity<EntityModel<Plataforma>> criar(@Valid @RequestBody Plataforma plataforma) {
         Plataforma salva = service.salvar(plataforma);
         EntityModel<Plataforma> model = EntityModel.of(salva);
         model.add(linkTo(methodOn(PlataformaController.class).buscarPorId(salva.getId())).withSelfRel());
@@ -67,7 +67,7 @@ public class PlataformaController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar os dados de uma plataforma", description = "Atualiza uma plataforma existente pelo ID.")
+    @Operation(summary = "Atualizar uma plataforma", description = "Atualiza os dados de uma plataforma existente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Plataforma atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação ou ID inválido"),
@@ -83,7 +83,7 @@ public class PlataformaController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir uma plataforma pelo ID", description = "Remove uma plataforma do cadastro.")
+    @Operation(summary = "Excluir uma plataforma pelo ID", description = "Remove uma plataforma pelo seu identificador.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Plataforma excluída com sucesso"),
             @ApiResponse(responseCode = "400", description = "ID fornecido é inválido"),
